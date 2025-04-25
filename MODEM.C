@@ -1,7 +1,10 @@
 /* Talk to modem over serial port
-Based on:vhttps://www.edaboard.com/threads/serial-communication-in-turbo-c.197085/
 
-IMPORTANT: you must turn server OFF in settings in the 100LX configuration.*/
+Based on: https://www.edaboard.com/threads/serial-communication-in-turbo-c.197085/
+
+IMPORTANT: you must turn server OFF in settings in the 100LX configuration.
+*/
+
 #include <dos.h>
 #include <stdio.h>
 #include <conio.h>
@@ -16,6 +19,8 @@ IMPORTANT: you must turn server OFF in settings in the 100LX configuration.*/
 
 void modem_init(Modem *modem) {
 	modem->state = MODEM_UNKNOWN;
+	/*modem->buffer = malloc(MODEM_BUFFER_SIZE);*/
+	
     outportb(PORT1 + 1 , 0); /* Turn off interrupts - Port1 */
 
     outportb(PORT1 + 3 , 0x80); /* SET DLAB ON */
@@ -33,23 +38,47 @@ void modem_init(Modem *modem) {
     outportb(PORT1 + 4 , 0x00); /* Turn off DTR, RTS, and OUT2 */
 }
 
+void modem_destroy(Modem *modem) {
+	/*free(modem->buffer);
+	modem->buffer = NULL;*/
+}
+
 void modem_send(Modem *modem, const char *str) {
     int c;
     int ch;
 
-printf("\nSample Comm's Program. Press ESC to quit \n");
+	do {
+		outportb(PORT1, *str);
+		str++;
+	} while (*str != 0);
+}
+
+extern int modem_receive(Modem *modem, char *buffer, int bufferLen, BOOL nullTerminate);
+    BOOL received;
+	int got = 0;
+    char ch;
 
 	do {
-	  c = inportb(PORT1 + 5); /* Check to see if char has been */
-	  /* received. */
-	  if (c & 1) {ch = inportb(PORT1); /* If so, then get Char */
-    	printf("%c",ch);} /* Print Char to Screen */
-
-		if (kbhit()){
-			ch = getch(); /* If key pressed, get Char */
-			outportb(PORT1, ch);
-		} /* Send Char to Serial Port */
-
-	} while (ch !=27); /* Quit when ESC (ASC 27) is pressed */
+		if (got == bufferlen-1) {
+			if (nullTerminate) {
+				buffer[bufferlen-1] = 0;
+			}
+			return got;
+		}
+  	  received = inportb(PORT1 + 5) & 1; /* Check to see if char has been received. */
+  	  if (received) {
+		  ch = inportb(PORT1); /* If so, then get Char */
+  		  printf("%c",ch);
+		  
+		  *buffer = ch;
+		  
+		  got++;
+		  buffer++;
+	  }
+	} while (received);
+	
+	if (nullTerminate) {
+		buffer[got] = 0;
+	}
+	return got;
 }
-
