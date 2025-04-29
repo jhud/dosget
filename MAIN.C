@@ -13,6 +13,7 @@ int main(int argc, char *argv[]) {
 	 char *url = NULL;
 	 char *outFilename = NULL;
 	char buf[1024];
+	int foo;
 
      while((opt = getopt(argc, argv, "u:o:")) != EOF) {
 		switch(opt) {
@@ -31,13 +32,24 @@ int main(int argc, char *argv[]) {
     	usage();
 		return -1;
 	}
-	 printf(url);
-	 serial_init(0x0C);
-   /* serial_send("ATds1\n");
-sleep(1); */
- serial_receive(buf, 1024, true);
-				 printf(buf);
-serial_shutdown();
+
+	serial_listPorts();
+
+	 serial_init(BAUD_300, buf, 1024);
+
+	 while(1){
+    	serial_send((foo&1)?"abaracadabra":"zoo");
+        foo++;
+		serial_receive();
+		delay(500);
+  	  if (kbhit()) {
+          	if (getch() == 27) {
+                  printf("User interrupted.\n");
+  				break;
+  			}
+  		}
+	}
+	serial_shutdown();
 
 	/* Clean up saved args */
 	free(url);

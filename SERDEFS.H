@@ -3,9 +3,11 @@
 
 #define PORT1 0x3F8
 
-#define BAUD_300 0x0180
+#define BAUD_300  0x0180
 #define BAUD_9600 0x000C
 
+
+#define PIC_PORT 0x21 /* Programmable Interrupt Controller */
 
 #define RBR              0    /* Receive buffer register */
 #define THR              0    /* Transmit holding reg.   */
@@ -13,6 +15,7 @@
 #define IER_RX_DATA      1    /* Enable RX interrupt bit */
 #define IER_THRE         2    /* Enable TX interrupt bit */
 #define IIR              2    /* Interrupt ID register   */
+#define FCR              2    /* FIFO control register   */
 #define IIR_MODEM_STATUS 0    /* Modem stat. interrupt ID*/
 #define IIR_TRANSMIT     2    /* Transmit interrupt ID   */
 #define IIR_RECEIVE      4    /* Receive interrupt ID    */
@@ -33,9 +36,11 @@
 #define MCR_RTS          2    /* Bit to turn on RTS      */
 #define MCR_OUT1         4    /* Bit to turn on OUT1     */
 #define MCR_OUT2         8    /* Bit to turn on OUT2     */
+#define MCR_LOOPBACK	 0x10 /* Bit for turning on hardware loopback */
 #define LSR              5    /* Line Status register    */
 #define MSR              6    /* Modem Status register   */
 #define DLL              0    /* Divisor latch LSB       */
 #define DLM              1    /* Divisor latch MSB       */
 
 #endif /* _MODEM_H_ */
+

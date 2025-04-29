@@ -26,7 +26,9 @@ extern void serial_send(const char *);
  * nullTerminate - terminate the buffer with NULL
  * @return num bytes received.
  */
-extern int serial_receive(char *, int, bool);
+extern int serial_receive();
+
+void serial_listPorts();
 
 #endif /* _MODEM_H_ */
 
