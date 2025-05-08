@@ -2,10 +2,15 @@
 #include <string.h>
 #include "getopt.h"
 
+#include "james/loopback.h"
 #include "james/serial.h"
 
+
+
 void usage() {
-	printf("dosget /u url /o filename.txt\n");
+	printf("dosget /u url /o filename.txt [/l /h]\n");
+	printf("/l ignore other params, do loopback test.\n");
+	printf("/h loopback with hex dump.\n");
 }
 
 int main(int argc, char *argv[]) {
@@ -14,9 +19,14 @@ int main(int argc, char *argv[]) {
 	 char *outFilename = NULL;
 	char buf[1024];
 	int foo;
+	char ch;
 
-     while((opt = getopt(argc, argv, "u:o:")) != EOF) {
+	 while((opt = getopt(argc, argv, "lhu:o:")) != EOF) {
 		switch(opt) {
+			case 'l':
+			case 'h':
+				loopbackTestLoop(opt);
+				return 0;
 			case 'u':
 				url = strdup(optarg);
 				break;
@@ -25,6 +35,8 @@ int main(int argc, char *argv[]) {
 				break;
 			case '?':
 				printf("unknown option\n");
+				usage();
+				break;
 		}
      }
 	 if (url == NULL || outFilename == NULL) {
@@ -33,27 +45,15 @@ int main(int argc, char *argv[]) {
 		return -1;
 	}
 
-	serial_listPorts();
-
-	 serial_init(BAUD_300, buf, 1024);
-
-	 while(1){
-    	serial_send((foo&1)?"abaracadabra":"zoo");
-        foo++;
-		serial_receive();
-		delay(500);
-  	  if (kbhit()) {
-          	if (getch() == 27) {
-                  printf("User interrupted.\n");
-  				break;
-  			}
-  		}
+		serial_init(BAUD_300, buf, 1024);
+	if (!modem_connect()) {
+		goto fail_exit;
 	}
-	serial_shutdown();
 
+fail_exit:
 	/* Clean up saved args */
 	free(url);
-	 free(outFilename);
-     return 0;
+	free(outFilename);
+    return 0;
  }
 

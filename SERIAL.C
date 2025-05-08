@@ -11,6 +11,7 @@ so better to start from DOS to eliminate any interference possibilities.
 #include <dos.h>
 #include <stdio.h>
 #include <conio.h>
+#include <assert.h>
 
 #ifdef __TURBOC__
 #include "james/defs.h"
@@ -41,8 +42,7 @@ static void interrupt PORT1INT() /* Interrupt Service Routine (ISR) for PORT1 */
 		if (c & 2) {
 /*        	outportb(PORT1, 64 + rand()%26);*/
 		}
-/*enable();       */
-    outportb(0x20, 0x20);
+	outportb(0x20, 0x20);
 }
 
 void serial_init(unsigned short int baudId, char *buffer, int bufferSize) {
@@ -114,22 +114,71 @@ void serial_shutdown() {
 void serial_send(const char *str) {
 	do {
 		outportb(PORT1, *str);
+		putch(*str
+		);
 		delay(100);
 		str++;
 	} while (*str != 0);
 }
 
-int serial_receive() {
+int serial_getline(char *outbuf, int outbufLen, char newline) {
+	char ch = 0;
+	int gotCount = 0;
+	int timeout = 0;
+	assert(outbufLen > 0);
+
+	while (timeout < 1000) {
+		while (g_bufferIn != g_bufferOut) {
+            ch = g_buffer[g_bufferOut];
+            g_bufferOut++;
+			g_bufferOut %= g_bufferSize;
+
+			if (ch == 0xa || ch == 0xd || ch == 0)  {
+				*outbuf = 0;
+				return gotCount;
+			}
+			gotCount++;
+			*outbuf = ch;
+			if (gotCount == outbufLen-1) {
+				break;
+			}
+
+			outbuf++;
+			timeout = 0;
+		}
+		timeout++;
+	}
+	*outbuf = 0;
+	return gotCount;
+}
+
+char serial_getch() {
+	char buff;
+	int count;
+
+	count = serial_receive(&buff, 1);
+	if (count == 0) {
+		return 0;
+	}
+	return buff;
+}
+
+int serial_receive(char *outbuf, int outbufLen) {
     int lineStatus;
     int ch;
 	int gotCount = 0;
+	assert(outbufLen > 0);
 
 		while (g_bufferIn != g_bufferOut) {
             ch = g_buffer[g_bufferOut];
             g_bufferOut++;
 			g_bufferOut %= g_bufferSize;
 			gotCount++;
-			printf("%c", ch);
+			*outbuf = ch;
+			if (gotCount == outbufLen) {
+				return gotCount;
+			}
+			outbuf++;
 		}
 
   	  lineStatus = inportb(PORT1 + LSR); /* Check to see if char has been received.*/
@@ -157,7 +206,6 @@ int serial_receive() {
 		  printf("Error: bad data\n");
 	  }
 
-	DB("Got %d chars\n", gotCount);
 	return gotCount;
 }
 
