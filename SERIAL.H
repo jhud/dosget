@@ -39,10 +39,10 @@ extern int serial_receive(char *, int);
 
 /**
  * Get a full line of output.
- * int newline newline char to terminate line
- * @return num of chars read.
+ * @param newlines stirng of newline chars to terminate line
+ * @return num of chars read. 0 if none read or timeout.
  */
-extern int serial_getline(char *, int, char);
+extern int serial_getline(char *buffer, int bufferLen, const char *newlines);
 
 /**
  * Debug list all port addresses on machine.

@@ -121,10 +121,12 @@ void serial_send(const char *str) {
 	} while (*str != 0);
 }
 
-int serial_getline(char *outbuf, int outbufLen, char newline) {
+int serial_getline(char *outbuf, int outbufLen, const char *newlineChars) {
+	int i;
 	char ch = 0;
 	int gotCount = 0;
 	int timeout = 0;
+	int numNewlineChars = strlen(newlineChars);
 	assert(outbufLen > 0);
 
 	while (timeout < 1000) {
@@ -133,9 +135,11 @@ int serial_getline(char *outbuf, int outbufLen, char newline) {
             g_bufferOut++;
 			g_bufferOut %= g_bufferSize;
 
-			if (ch == 0xa || ch == 0xd || ch == 0)  {
-				*outbuf = 0;
-				return gotCount;
+			for (i=0; i < numNewlineChars; i++) {
+				if (ch == newlineChars[i] || ch == 0)  {
+					*outbuf = 0;
+					return gotCount;
+				}
 			}
 			gotCount++;
 			*outbuf = ch;

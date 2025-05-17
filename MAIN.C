@@ -17,7 +17,7 @@ int main(int argc, char *argv[]) {
      int opt;
 	 char *url = NULL;
 	 char *outFilename = NULL;
-	char buf[1024];
+	char buf[0x7fff];
 	int foo;
 	char ch;
 
@@ -49,6 +49,8 @@ int main(int argc, char *argv[]) {
 	if (!modem_connect()) {
 		goto fail_exit;
 	}
+
+	modem_get(url, buf, 0x7fff);
 
 fail_exit:
 	/* Clean up saved args */
