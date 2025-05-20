@@ -8,7 +8,8 @@
 
 
 void usage() {
-	printf("dosget /u url /o filename.txt [/l /h]\n");
+	printf("dosget /u url /o filename.txt [/b 9600 /l /h]\n");
+	printf("/b baud rate (default 300)\n");
 	printf("/l ignore other params, do loopback test.\n");
 	printf("/h loopback with hex dump.\n");
 }
@@ -19,9 +20,10 @@ int main(int argc, char *argv[]) {
 	 char *outFilename = NULL;
 	char buf[0x7fff];
 	int foo;
+	uint32_t baud = 300;
 	char ch;
 
-	 while((opt = getopt(argc, argv, "lhu:o:")) != EOF) {
+	 while((opt = getopt(argc, argv, "lhu:o:b:")) != EOF) {
 		switch(opt) {
 			case 'l':
 			case 'h':
@@ -33,6 +35,8 @@ int main(int argc, char *argv[]) {
 			case 'o':
 				outFilename = strdup(optarg);
 				break;
+			case 'b':
+				baud = atoi(optarg);
 			case '?':
 				printf("unknown option\n");
 				usage();
@@ -45,7 +49,7 @@ int main(int argc, char *argv[]) {
 		return -1;
 	}
 
-		serial_init(BAUD_300, buf, 1024);
+		serial_init(baud, buf, 1024);
 	if (!modem_connect()) {
 		goto fail_exit;
 	}

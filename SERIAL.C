@@ -45,14 +45,28 @@ static void interrupt PORT1INT() /* Interrupt Service Routine (ISR) for PORT1 */
 	outportb(0x20, 0x20);
 }
 
-void serial_init(unsigned short int baudId, char *buffer, int bufferSize) {
-	int baudMSB = baudId >> 8;
-	int baudLSB = baudId & 0xFF;
 
-	DB("Starting serial\n");
+unsigned short int serial_baudToDivider(uint32_t baud) {
+	return 115200L / baud; /* Clock speed of UART hardware on old DOS machines */
+}
+
+
+void serial_init(uint32_t baud, char *buffer, unsigned int bufferSize) {
+	int baudMSB, baudLSB, baudId;
+
+	if (baud == 0) {
+		printf("Bad baud rate of 0.\n");
+		return;
+	}
+
+	baudId = serial_baudToDivider(baud);
+	baudMSB = baudId >> 8;
+	baudLSB = baudId & 0xFF;
+
+	printf("Starting serial with divider %d\n", baudId);
 
 	if (baudId == 0) {
-		printf("Bad baud rate of 0.\n");
+		printf("Bad baud divisor of 0.\n");
 		return;
 	}
 

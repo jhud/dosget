@@ -3,10 +3,6 @@
 
 #define PORT1 0x3F8
 
-#define BAUD_300  0x0180
-#define BAUD_9600 0x000C
-
-
 #define PIC_PORT 0x21 /* Programmable Interrupt Controller */
 
 #define RBR              0    /* Receive buffer register */

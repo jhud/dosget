@@ -3,6 +3,7 @@
 
 #ifdef __TURBOC__
 #include "james/serdefs.h"
+#include "james/defs.h"
 #else
 #include "serdefs.h"
 #endif
@@ -10,7 +11,7 @@
 /**
  * Setup serial before use
  */
-extern void serial_init();
+extern void serial_init(uint32_t, char *, unsigned int);
 
 /**
  * Shutdown serial port, free resources.

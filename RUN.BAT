@@ -1,0 +1,1 @@
+dosget /u https://www.disconnectionist.com/text.txt /o test.txt /b 9600
